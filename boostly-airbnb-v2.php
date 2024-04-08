@@ -254,7 +254,7 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
     boostly_airbnb_update_property_calendar_v3($post_id, $airbnb_data);
 
 
-    update_post_meta($post_id, 'property_url' , 'airbnb.com/rooms/' . $property_id);
+    update_post_meta($post_id, 'property_url' , 'airbnb.com/rooms/' . $airbnb_data['property_id']);
      update_post_meta($post_id, 'boostly_show_map', 1);
      update_post_meta($post_id, 'boostly_zip', ''); // default
      update_post_meta($post_id, 'boostly_night_price', $airbnb_data['price']['amount'] ?? 0); // default
