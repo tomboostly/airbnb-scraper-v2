@@ -4,6 +4,8 @@ Plugin Name: Boostly AirBNB Scraper V2
 Description: Adds a submenu "AirBnb Requests V2" below the custom post type "Listings".
 Version: 1.0.0
 Author: ~ Boostly
+GitHub Plugin URI: https://github.com/tomboostly/airbnbv2-scraper-api
+
 */
 
 define('AIRBNB_CLOUDWAYS_URL', 'https://phpstack-1244200-4452379.cloudwaysapps.com/');
