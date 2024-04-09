@@ -2,7 +2,7 @@
 /*
 Plugin Name: Boostly AirBNB Scraper V2
 Description: Adds a submenu "AirBnb Requests V2" below the custom post type "Listings".
-Version: 1.0
+Version: 1.0.0
 Author: ~ Boostly
 */
 
@@ -123,6 +123,7 @@ function boostly_sync_all_listings(){
                 boostly_create_update_listing_data(get_the_ID(), $airbnb_data); 
             }           
             // $endpoint = 'boostly_airbnb_scraper/' . $property_id;
+            sleep(2);
         }
     } else {
         // no posts found
