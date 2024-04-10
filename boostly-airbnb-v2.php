@@ -9,7 +9,7 @@ GitHub Plugin URI: https://github.com/tomboostly/airbnb-scraper-v2
 
 */
 
-define('AIRBNB_CLOUDWAYS_URL', 'https://phpstack-1244200-4452379.cloudwaysapps.com/');
+define('AIRBNB_CLOUDWAYS_URL', 'https://api.boostly.co.uk/');
 
 if (!wp_next_scheduled('boostly_custom_daily_event')) {
     wp_schedule_event(time(), 'daily', 'boostly_custom_daily_event');
