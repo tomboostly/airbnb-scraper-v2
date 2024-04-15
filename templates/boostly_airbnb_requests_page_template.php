@@ -105,6 +105,7 @@ $airbnb_request = $wpdb->prefix . "airbnb_request";
                 <th>Author</th>
                 <th>Property Type</th>
                 <th>Airbnb URL</th> <!-- New column for Airbnb URL -->
+                <th>Publish Status</th>
                 <!-- Add more columns as needed -->
             </tr>
         </thead>
@@ -136,7 +137,8 @@ $airbnb_request = $wpdb->prefix . "airbnb_request";
                 while ($listings_with_meta_and_status->have_posts()) : $listings_with_meta_and_status->the_post();
                     $property_type = get_post_meta(get_the_ID(), 'boostly_property_type', true);
                     $property_url = get_post_meta(get_the_ID(), 'property_url', true);
-            ?>
+                    $is_published = get_post_status(get_the_ID()) == 'publish'; // Check if the post is published
+                    ?>
                     <tr>
                         <td><?php echo get_the_ID(); ?></td>
                         <td><?php the_title(); ?></td>
@@ -144,6 +146,13 @@ $airbnb_request = $wpdb->prefix . "airbnb_request";
                         <td><?php echo esc_html($property_type); ?></td>
                         <td><?php echo esc_url($property_url); ?></td> <!-- Display Airbnb URL -->
                         <td><?php echo esc_html($host_email); ?></td> <!-- Display Host -->
+                        <td>
+                            <?php if ($is_published): ?>
+                                <button disabled style="background-color: grey; color: white;">Published</button>
+                            <?php else: ?>
+                                <button onclick="publishListing(<?php echo get_the_ID(); ?>);" style="background-color: blue; color: white;">Publish</button>
+                            <?php endif; ?>
+                        </td>                          
                         <!-- Add more cells as needed -->
                     </tr>
             <?php

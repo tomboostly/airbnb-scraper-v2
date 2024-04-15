@@ -10,6 +10,7 @@ GitHub Plugin URI: https://github.com/tomboostly/airbnb-scraper-v2
 */
 
 define('AIRBNB_CLOUDWAYS_URL', 'https://api.boostly.co.uk/');
+// define('HOUR_IN_SECONDS', 3600);
 
 if (!wp_next_scheduled('boostly_custom_daily_event')) {
     wp_schedule_event(time(), 'daily', 'boostly_custom_daily_event');
@@ -146,6 +147,8 @@ function boostly_reload_list_template(){
 // AJAX action to handle the sync request
 function boostly_sync_action() {
 
+    set_transient('boostly_airbnb_v2_progress', 'Scraping data', HOUR_IN_SECONDS);
+
     // Handle the AJAX request here
     $data = $_POST['data'];
 
@@ -169,7 +172,22 @@ function boostly_sync_action() {
     wp_die(); // Always include this to terminate the AJAX request properly
 }
 
+add_action('wp_ajax_publish_listing', 'handle_publish_listing');
+
+function handle_publish_listing() {
+    $post_id = $_POST['post_id'];
+    $post = array(
+        'ID'          => $post_id,
+        'post_status' => 'publish'
+    );
+    wp_update_post($post);
+    echo 'Success'; // Return something to AJAX call
+    wp_die(); // End AJAX request
+}
+
 function boostly_create_update_listing_data($post_id, $airbnb_data){
+
+    set_transient('boostly_airbnb_v2_progress', 'Setting listing information', HOUR_IN_SECONDS);
 
     $args = array(
         'post_type'      => 'listing', // Custom post type
@@ -255,6 +273,8 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
         boostly_airbnb_set_property_category($roomType, $post_id, 'room_type');
     }    
 
+    set_transient('boostly_airbnb_v2_progress', 'Syncing Availabilities', HOUR_IN_SECONDS);
+
     boostly_airbnb_update_property_calendar_v3($post_id, $airbnb_data);
 
 
@@ -298,6 +318,9 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
   
         foreach ($photos as $photo) {
             $imgArr = explode('?', $photo['pictureUrl']);
+
+            set_transient('boostly_airbnb_v2_progress', 'Uploading image ' . $imgArr[0], HOUR_IN_SECONDS);
+
             if ($i == 0) {
                 $feature_id = boostly_airbnb_upload_media($imgArr[0]);
                 update_post_meta($post_id, '_thumbnail_id', $feature_id);
@@ -315,6 +338,15 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
   
     update_post_meta($post_id, 'boostly_pms_id', $airbnb_data['property_id']); //editbenjo
 
+    set_transient('boostly_airbnb_v2_progress', '', HOUR_IN_SECONDS);
+
+}
+
+add_action('wp_ajax_boostly_check_progress', 'boostly_check_progress');
+function boostly_check_progress() {
+    // Retrieve progress information from session or database
+    echo get_transient('boostly_airbnb_v2_progress');
+    wp_die(); // Required to terminate immediately and return a proper response
 }
 
 function boostly_airbnb_update_property_calendar_v3($post_id, $property_data) {

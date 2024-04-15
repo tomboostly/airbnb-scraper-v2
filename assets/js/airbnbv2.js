@@ -21,6 +21,10 @@ jQuery(document).ready(function($) {
         event.preventDefault();
         // Show loading screen
         $('#loadingScreen').show();
+        $('#boostly-loading-container-text').html(`
+            <p style='font-size: 20px'>Please wait we are adding the listing...</p>
+            <p  style='font-size: 20px'>Please don't close the window</p>        
+        `);
 
         // Get the data from the input field
         var data = $('input[name="sync_data"]').val();
@@ -63,10 +67,10 @@ jQuery(document).ready(function($) {
                 property_sync: property_sync_value
             },
             success: function(response) {
-                alert('Settings saved!');
+
             },
             error: function() {
-                alert('Failed to save settings.');
+
             }
         });
     });
@@ -84,21 +88,67 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // Function to reload the template
-    function reloadTemplate() {
-        $.ajax({
-            url: ajax_object.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'boostly_reload_list_template'
-            },
-            success: function(response) {
-                // Assuming 'response' contains the HTML of the template
-                $('#boostly_airbnb_v2').html(response); // Replace '#container' with the actual ID of your template container
-            },
-            error: function(xhr, status, error) {
-                console.error('Error reloading template:', xhr.responseText);
-            }
-        });
-    }    
+    updateProgress();    
+   
 });
+
+
+function publishListing(id) {
+    console.log("Publishing the listing")
+
+    jQuery('#loadingScreen').show();
+
+    jQuery('#boostly-loading-container-text').html(`
+        <p style='font-size: 20px'>Please wait we are publishing the listing...</p>
+        <p  style='font-size: 20px'>Please don't close the window</p>        
+    `);
+
+    jQuery.ajax({
+        url: ajax_object.ajax_url,
+        type: 'POST',
+        data: {
+            action: 'publish_listing', // Your WordPress action hook
+            post_id: id
+        },
+        success: function(response) {
+            alert('Listing Published!');
+            reloadTemplate()
+        },
+        complete: function(){
+            jQuery('#loadingScreen').hide();                
+        }            
+    });
+}   
+
+// Function to reload the template
+function reloadTemplate() {
+    jQuery.ajax({
+        url: ajax_object.ajax_url,
+        type: 'POST',
+        data: {
+            action: 'boostly_reload_list_template'
+        },
+        success: function(response) {
+            // Assuming 'response' contains the HTML of the template
+            jQuery('#boostly_airbnb_v2').html(response); // Replace '#container' with the actual ID of your template container
+        },
+        error: function(xhr, status, error) {
+            console.error('Error reloading template:', xhr.responseText);
+        }
+    });
+} 
+
+
+function updateProgress() {
+    jQuery.ajax({
+        url: ajax_object.ajax_url, // This is automatically defined by WordPress if you use wp_localize_script
+        type: 'POST',
+        data: {
+            'action': 'boostly_check_progress', // The WordPress hook to call
+        },
+        success: function(response) {
+            jQuery('#boostly-substatus').text(response); // Update the progress text
+            setTimeout(updateProgress, 1000); // Poll every second
+        }
+    });
+}

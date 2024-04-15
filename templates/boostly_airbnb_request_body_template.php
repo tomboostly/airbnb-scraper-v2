@@ -20,7 +20,8 @@ if ($listings_with_meta_and_status->have_posts()) :
         $property_url = get_post_meta(get_the_ID(), 'property_url', true);
         $host_email = get_post_meta(get_the_ID(), 'boostly_airbnb_host_email', true);
         $status = get_post_meta(get_the_ID(), 'request_status', true);
-?>
+        $is_published = get_post_status(get_the_ID()) == 'publish'; // Check if the post is published
+        ?>
         <tr>
             <td><?php echo get_the_ID(); ?></td>
             <td><?php the_title(); ?></td>
@@ -29,6 +30,13 @@ if ($listings_with_meta_and_status->have_posts()) :
             <td><?php echo esc_url($property_url); ?></td> <!-- Display Airbnb URL -->
             <td><?php echo esc_html($host_email); ?></td> <!-- Display Host -->
             <td><?php echo esc_html($status); ?></td> <!-- Display Status -->
+            <td>
+                <?php if ($is_published): ?>
+                    <button disabled style="background-color: grey; color: white;">Published</button>
+                <?php else: ?>
+                    <button onclick="publishListing(<?php echo get_the_ID(); ?>);" style="background-color: blue; color: white;">Publish</button>
+                <?php endif; ?>
+            </td>                   
             <!-- Add more cells as needed -->
         </tr>
 <?php
