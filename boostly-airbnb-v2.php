@@ -568,3 +568,44 @@ add_action('update_option_boostly_airbnb_v2_ical_sync_setting', 'boostly_airbnb_
 add_action('boostly_airbnb_v2_sync_all_listings_event', 'boostly_sync_all_listings');
 add_action('boostly_airbnb_v2_update_property_calendar_event', 'boostly_airbnb_update_property_calendar_v3');
 
+function boostly_add_custom_meta_box() {
+    add_meta_box(
+        'boostly_custom_meta_box',     // ID of the meta box
+        'Boostly Airbnb V2',             // Title of the meta box
+        'boostly_custom_meta_box_callback', // Callback function
+        'listing',                     // Post type
+        'normal',                      // Context
+        'high'                         // Priority
+    );
+}
+add_action('add_meta_boxes', 'boostly_add_custom_meta_box');
+
+function boostly_custom_meta_box_callback($post) {
+    wp_nonce_field(basename(__FILE__), 'boostly_custom_nonce');
+    $boostly_pms_id = get_post_meta($post->ID, 'boostly_pms_id', true);
+
+    echo '<label for="boostly_pms_id">PMS ID:</label>';
+    echo '<input type="text" id="boostly_pms_id" name="boostly_pms_id_display" value="' . esc_attr($boostly_pms_id) . '" disabled />';
+    echo '<input type="hidden" id="boostly_pms_id_hidden" name="boostly_pms_id" value="' . esc_attr($boostly_pms_id) . '"/>';
+}
+
+function boostly_save_custom_meta_box_data($post_id) {
+    // Check if nonce is set and valid
+    if (!isset($_POST['boostly_custom_nonce']) || !wp_verify_nonce($_POST['boostly_custom_nonce'], basename(__FILE__)))
+        return $post_id;
+
+    // Check autosave
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        return $post_id;
+
+    // Check user's permission
+    if ('listing' == $_POST['post_type'] && !current_user_can('edit_post', $post_id))
+        return $post_id;
+
+    // Sanitize and save the input
+    if (isset($_POST['boostly_pms_id'])) {
+        update_post_meta($post_id, 'boostly_pms_id', sanitize_text_field($_POST['boostly_pms_id']));
+    }
+}
+add_action('save_post', 'boostly_save_custom_meta_box_data');
+
