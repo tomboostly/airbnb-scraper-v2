@@ -2,7 +2,7 @@
 /*
 Plugin Name: Boostly AirBNB Scraper V2
 Description: Adds a submenu "AirBnb Requests V2" below the custom post type "Listings".
-Version: 1.0.3
+Version: 1.0.4
 Author: ~ Boostly
 GitHub Plugin URI: tomboostly/airbnb-scraper-v2
 GitHub Plugin URI: https://github.com/tomboostly/airbnb-scraper-v2
@@ -212,7 +212,7 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
             'ID' => $post_id, // Specify the ID of the post you want to update
             'post_title' => isset($airbnb_data['title']) ? $airbnb_data['title'] : '',
             'post_type' => 'listing',
-            'post_content' => $airbnb_data['shortDescription']
+            'post_content' => $post_description
         );
         
         // Update the post
@@ -223,7 +223,7 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
             'post_title' => isset($airbnb_data['title']) ? $airbnb_data['title'] : '',
             'post_status' => 'draft',
             'post_type' => 'listing',
-            'post_content' => $airbnb_data['shortDescription']
+            'post_content' => $post_description
          );
       
          $post_id = wp_insert_post($post_data);        
