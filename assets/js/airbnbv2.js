@@ -89,6 +89,31 @@ jQuery(document).ready(function($) {
     }
 
     updateProgress();    
+
+    $('#save_price_override_button').on('click', function() {
+        console.log("#")
+        // Get the price_override value
+        var priceOverrideValue = $('#price_override').is(':checked') ? '1' : '0';
+
+        // AJAX request to save the price_override value
+        $.ajax({
+            type: 'POST',
+            url: ajaxurl,
+            data: {
+                action: 'boostly_save_price_override',
+                price_override: priceOverrideValue,
+                // nonce: $('#_wpnonce').val() // Pass the nonce for security
+            },
+            success: function(response) {
+                // Handle success response
+                console.log('Price Override saved successfully.');
+            },
+            error: function(xhr, status, error) {
+                // Handle error response
+                console.error('Error occurred while saving Price Override:', error);
+            }
+        });
+    });    
    
 });
 

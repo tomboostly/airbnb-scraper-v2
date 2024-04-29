@@ -58,7 +58,13 @@ $airbnb_request = $wpdb->prefix . "airbnb_request";
             <?php wp_nonce_field('boostly_airbnb_v2_nonce'); ?>
 
             <button type="submit" id="save_button">Save</button>
-        </form>        
+        </form>  
+        
+        <div id="price_override_section">
+            <input type="checkbox" id="price_override" name="price_override" <?php echo (get_option('boostly_price_override') == '1') ? 'checked' : ''; ?>>
+            <label for="price_override">Price Override</label>
+            <button id="save_price_override_button">Save Price Override</button>
+        </div>        
         <h2> Airbnb Listing Requests </h2>
                 <?php
                 $requests = $wpdb->get_results("SELECT * FROM $airbnb_request ORDER BY created_at DESC");
