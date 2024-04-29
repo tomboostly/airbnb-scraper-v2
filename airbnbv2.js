@@ -19,11 +19,37 @@ jQuery(document).ready(function($) {
     // Function to handle the AJAX request
     $('#sync_button').click(function(event) {
         event.preventDefault();
+        // Show loading screen
+        $('#loadingScreen').show();
+        $('#boostly-loading-container-text').html(`
+            <p style='font-size: 20px'>Please wait we are adding the listing...</p>
+            <p  style='font-size: 20px'>Please don't close the window</p>        
+        `);
+
         // Get the data from the input field
         var data = $('input[name="sync_data"]').val();
 
-        airbnbV2SyncAction(data);
-
+        // Perform the AJAX request
+        $.ajax({
+            url: ajax_object.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'boostly_sync_action',
+                data: data
+            },
+            success: function(response) {
+                // Handle the response here
+                console.log(response);
+                reloadTemplate();
+            },
+            error: function(xhr, status, error) {
+                // Handle errors here
+                console.error(xhr.responseText);
+            },
+            complete: function(){
+                $('#loadingScreen').hide();                
+            }
+        });
     });
 
     $('#sync-form').on('submit', function(e) {
@@ -63,43 +89,34 @@ jQuery(document).ready(function($) {
     }
 
     updateProgress();    
+
+    $('#save_price_override_button').on('click', function() {
+        console.log("#")
+        // Get the price_override value
+        var priceOverrideValue = $('#price_override').is(':checked') ? '1' : '0';
+
+        // AJAX request to save the price_override value
+        $.ajax({
+            type: 'POST',
+            url: ajaxurl,
+            data: {
+                action: 'boostly_save_price_override',
+                price_override: priceOverrideValue,
+                // nonce: $('#_wpnonce').val() // Pass the nonce for security
+            },
+            success: function(response) {
+                // Handle success response
+                console.log('Price Override saved successfully.');
+            },
+            error: function(xhr, status, error) {
+                // Handle error response
+                console.error('Error occurred while saving Price Override:', error);
+            }
+        });
+    });    
    
 });
 
-
-function airbnbV2SyncAction(data){
-
-    // Show loading screen
-    jQuery('#loadingScreen').show();
-    jQuery('#boostly-loading-container-text').html(`
-        <p style='font-size: 20px'>Please wait we are adding the listing...</p>
-        <p  style='font-size: 20px'>Please don't close the window</p>        
-    `);
-
-    console.log("Syncing data!")
-
-    // Perform the AJAX request
-    jQuery.ajax({
-        url: ajax_object.ajax_url,
-        type: 'POST',
-        data: {
-            action: 'boostly_sync_action',
-            data: data
-        },
-        success: function(response) {
-            // Handle the response here
-            console.log(response);
-            reloadTemplate();
-        },
-        error: function(xhr, status, error) {
-            // Handle errors here
-            console.error(xhr.responseText);
-        },
-        complete: function(){
-            jQuery('#loadingScreen').hide();                
-        }
-    });
-}
 
 function publishListing(id) {
     console.log("Publishing the listing")

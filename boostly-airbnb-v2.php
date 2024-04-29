@@ -2,7 +2,7 @@
 /*
 Plugin Name: Boostly AirBNB Scraper V2
 Description: Adds a submenu "AirBnb Requests V2" below the custom post type "Listings".
-Version: 1.0.4
+Version: 1.0.5
 Author: ~ Boostly
 GitHub Plugin URI: tomboostly/airbnb-scraper-v2
 GitHub Plugin URI: https://github.com/tomboostly/airbnb-scraper-v2
@@ -279,24 +279,29 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
 
 
     update_post_meta($post_id, 'property_url' , 'airbnb.com/rooms/' . $airbnb_data['property_id']);
-     update_post_meta($post_id, 'boostly_show_map', 1);
-     update_post_meta($post_id, 'boostly_zip', ''); // default
-     update_post_meta($post_id, 'boostly_night_price', $airbnb_data['price']['amount'] ?? 0); // default
-     update_post_meta($post_id, 'boostly_listing_address', isset($airbnb_data['address']) ? $airbnb_data['address'] : '');
-     update_post_meta($post_id, 'boostly_geolocation_long', $airbnb_data['coordinates']['lng'] ?? 0);
-     update_post_meta($post_id, 'boostly_geolocation_lat', $airbnb_data['coordinates']['lat'] ?? 0);
-     update_post_meta($post_id, 'boostly_listing_location', 0 . ',' . 0 . ',9');
-     update_post_meta($post_id, 'boostly_featured', 0);
-     update_post_meta($post_id, 'boostly_pets', 0);
-  
-     // update sku
-     update_post_meta($post_id, 'boostly_listing_id', $airbnb_data['property_id']);
-     update_post_meta($post_id, 'boostly_property_type', 'airbnb');
-     update_post_meta($post_id, '_photos', json_encode(isset($airbnb_data['photos']) ? $airbnb_data['photos'] : ''));
-  
-     $parent_id = 0;
+    update_post_meta($post_id, 'boostly_show_map', 1);
+    update_post_meta($post_id, 'boostly_zip', ''); // default
+     
+    $boostly_price_override = get_option('boostly_price_override');
+
+    if ($boostly_price_override !== false && $boostly_price_override === '1') {
+        update_post_meta($post_id, 'boostly_night_price', $airbnb_data['price']['amount'] ?? 0); // default
+    }
+    update_post_meta($post_id, 'boostly_listing_address', isset($airbnb_data['address']) ? $airbnb_data['address'] : '');
+    update_post_meta($post_id, 'boostly_geolocation_long', $airbnb_data['coordinates']['lng'] ?? 0);
+    update_post_meta($post_id, 'boostly_geolocation_lat', $airbnb_data['coordinates']['lat'] ?? 0);
+    update_post_meta($post_id, 'boostly_listing_location', 0 . ',' . 0 . ',9');
+    update_post_meta($post_id, 'boostly_featured', 0);
+    update_post_meta($post_id, 'boostly_pets', 0);
+
+    // update sku
+    update_post_meta($post_id, 'boostly_listing_id', $airbnb_data['property_id']);
+    update_post_meta($post_id, 'boostly_property_type', 'airbnb');
+    update_post_meta($post_id, '_photos', json_encode(isset($airbnb_data['photos']) ? $airbnb_data['photos'] : ''));
+
+    $parent_id = 0;
         //country
-        if (!empty($country)) {
+    if (!empty($country)) {
         $parent_id = boostly_airbnb_set_property_category($country, $post_id, 'listing_country');
 
         if (!empty($city)) {
@@ -609,3 +614,22 @@ function boostly_save_custom_meta_box_data($post_id) {
 }
 add_action('save_post', 'boostly_save_custom_meta_box_data');
 
+
+add_action('wp_ajax_boostly_save_price_override', 'boostly_save_price_override');
+function boostly_save_price_override() {
+    // Check if the request is coming from a valid user
+    if ( ! current_user_can('manage_options') ) {
+        wp_send_json_error('Permission denied');
+    }
+
+    // Check if the nonce is valid
+    // check_ajax_referer('boostly_ajax_nonce', 'nonce');
+
+    // Get the price_override value from the POST data
+    $price_override = isset($_POST['price_override']) ? $_POST['price_override'] : '';
+
+    // Save the price_override value in wp_options
+    update_option('boostly_price_override', $price_override);
+
+    wp_send_json_success('Price Override saved successfully');
+}
