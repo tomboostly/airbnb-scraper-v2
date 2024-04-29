@@ -107,6 +107,7 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 // Handle success response
                 console.log('Price Override saved successfully.');
+                alert('Override Saved')
             },
             error: function(xhr, status, error) {
                 // Handle error response
