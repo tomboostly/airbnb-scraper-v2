@@ -229,6 +229,10 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
          $post_id = wp_insert_post($post_data);        
     }    
 
+
+    boostly_airbnb_update_property_calendar_v3($post_id, $airbnb_data);
+
+
     $guests = explode(' ', $airbnb_data['guests'][0] ?? 1); //boostly_guests
     update_post_meta($post_id, 'boostly_guests', $guests[0]);
 
@@ -274,8 +278,6 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
     }    
 
     set_transient('boostly_airbnb_v2_progress', 'Syncing Availabilities', HOUR_IN_SECONDS);
-
-    boostly_airbnb_update_property_calendar_v3($post_id, $airbnb_data);
 
 
     update_post_meta($post_id, 'property_url' , 'airbnb.com/rooms/' . $airbnb_data['property_id']);
@@ -355,7 +357,7 @@ function boostly_check_progress() {
 }
 
 function boostly_airbnb_update_property_calendar_v3($post_id, $property_data) {
-    
+
     $calendar = $property_data['calendar'];
 
     if (!empty($calendar)) {
@@ -378,6 +380,15 @@ function boostly_airbnb_update_property_calendar_v3($post_id, $property_data) {
                 //_not_available_dates
             }
         }
+
+
+
+        // wp_send_json_success(array(
+        //     'reserved' => $reservations,
+        //     'unavailable' =>$not_available_dates,
+        // ));    
+    
+        // wp_die();         
 
         update_post_meta($post_id, '_available_dates', json_encode(array_filter(array_values(array_unique($available_dates)))));
         update_post_meta($post_id, '_not_available_dates', json_encode(array_filter(array_values(array_unique($not_available_dates)))));
