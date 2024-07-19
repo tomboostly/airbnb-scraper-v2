@@ -241,7 +241,8 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
     $baths = null;
     
     foreach ($airbnb_data as $key => $value) {
-        if (preg_match('/(\d+)/', $value, $matches)) {
+        // Ensure the value is a string before attempting to match a pattern
+        if (is_string($value) && preg_match('/(\d+)/', $value, $matches)) {
             switch ($key) {
                 case 'bedrooms':
                     $bedrooms = $matches[0];
@@ -260,7 +261,8 @@ function boostly_create_update_listing_data($post_id, $airbnb_data){
                     break;
             }
         }
-    }    
+    }
+    
 
     $listingAmenities = $airbnb_data["amenities"];
 
